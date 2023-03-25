@@ -6,20 +6,25 @@ from sys import argv
 from os.path import exists, dirname, splitext
 
 if len(argv) < 2 or argv[1] == "":
-    print("Usage: py " + argv[0] + " file")
+    print("Usage: py " + argv[0] + " file [rubric]")
     exit(1)
 
 # Get video files from selected directory
 directory = argv[1]
 if os.path.isfile(directory):
     directory = dirname(directory)
-included_extensions = ['.mov', '.mp4', '.mkv']
-file_names = [fn for fn in os.listdir(dirname(argv[1])) if any(fn.endswith(ext) for ext in included_extensions)]
+included_extensions = ['.mov', '.mp4', '.mkv', '.m4v', '.webm']
+file_names = [fn for fn in os.listdir(dirname(argv[1])) if any(fn.lower().endswith(ext) for ext in included_extensions)]
+
+# Use custom rubric file if given
+rubric_fname = "rubric.txt"
+if len(argv) == 3:
+    rubric_fname = argv[2]
 
 # Setup ChatGPT messages for grading
 openai.api_key = os.getenv('OPENAI_API_KEY')  # Your OpenAI API Key
 system_message = open("system_message.txt").read()  # Tells the AI how to behave
-rubric = "Here is the rubric:\n" + open("rubric.txt").read() + "\n\nDo you understand the requirements?"
+rubric = "Here is the rubric:\n" + open(rubric_fname).read() + "\n\nDo you understand the requirements?"
 rubric_response = "Yes, I understand the requirements."
 
 # Setup directories for storing outputs
