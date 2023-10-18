@@ -30,13 +30,13 @@ rubric_response = "Yes, I understand the requirements."
 # Setup directories for storing outputs
 os.makedirs(directory + "/transcripts", exist_ok=True)
 os.makedirs(directory + "/grades", exist_ok=True)
-os.makedirs("temp", exist_ok=True)
+os.makedirs(directory + "/audio", exist_ok=True)
 
 # Loop through all found video files
 for fname in file_names:
     # Create strings for filenames
     file = directory + "/" + fname
-    audio_fname = "temp/" + splitext(fname)[0] + ".mp3"
+    audio_fname = directory + "/audio/" + splitext(fname)[0] + ".mp3"
     transcript_fname = directory + "/transcripts/" + splitext(fname)[0] + ".txt"
     response_fname = directory + "/grades/" + splitext(fname)[0] + ".txt"
 
