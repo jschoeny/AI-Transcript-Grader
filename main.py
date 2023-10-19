@@ -36,9 +36,82 @@ class App(tk.Tk):
         self.file_names = []
         self.system_message = ""
         self.rubric_response = ""
+        self.selected_course = None
+        self.selected_assignment = None
 
-        self.setup_grading()
-        self.process_grades()
+        self.courses = canvas.get_courses(enrollment_type="ta", enrollment_state="active")
+        self.course_list = []
+        self.course_var = None
+        self.output_course_id = None
+
+        self.assignments = None
+        self.assignment_list = []
+        self.assignment_var = None
+        self.assignment_dropdown = None
+        self.output_assignment_id = None
+
+        self.setup()
+
+    def setup(self):
+        # Dropdown list made from list of courses
+        tk.Label(self, text="Select a course:").grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
+
+        self.course_list = []
+        for course in self.courses:
+            self.course_list.append(course.course_code)
+        self.course_var = tk.StringVar(self)
+        self.course_var.set(self.course_list[0])
+        course_dropdown = tk.OptionMenu(self, self.course_var, *self.course_list, command=self.choose_course)
+        course_dropdown.grid(row=0, column=1, padx=10, pady=10, sticky=tk.W)
+
+        tk.Label(self, text="Selected course id:").grid(row=1, column=0, padx=10, pady=10, sticky=tk.W)
+
+        self.output_course_id = tk.Label(self, text="")
+        self.output_course_id.grid(row=1, column=1, padx=10, pady=10, sticky=tk.W)
+
+        tk.Label(self, text="Select an assignment:").grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
+
+        # Dropdown list made from list of assignments, disabled until a course is selected
+        self.assignment_var = tk.StringVar(self)
+        self.assignment_var.set("")
+        self.assignment_dropdown = tk.OptionMenu(self, self.assignment_var, "", command=self.choose_assignment)
+        self.assignment_dropdown.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
+        self.assignment_dropdown["state"] = "disabled"
+
+        tk.Label(self, text="Selected assignment id:").grid(row=3, column=0, padx=10, pady=10, sticky=tk.W)
+
+        self.output_assignment_id = tk.Label(self, text="")
+        self.output_assignment_id.grid(row=3, column=1, padx=10, pady=10, sticky=tk.W)
+
+    def choose_course(self, *args):
+        # Set selected course to course.id of selected course
+        for course in self.courses:
+            if course.course_code == args[0]:
+                self.selected_course = course
+        self.output_course_id["text"] = f"{self.selected_course.id}"
+
+        self.selected_assignment = None
+        self.output_assignment_id["text"] = ""
+
+        self.assignment_dropdown["state"] = "normal"
+        self.assignment_list = []
+        self.assignments = self.selected_course.get_assignments(bucket="ungraded")
+        for assignment in self.assignments:
+            self.assignment_list.append(f"{assignment.name}")
+        self.assignment_var.set(self.assignment_list[0])
+        self.assignment_dropdown = tk.OptionMenu(self, self.assignment_var, *self.assignment_list, command=self.choose_assignment)
+        self.assignment_dropdown.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
+
+    def choose_assignment(self, *args):
+        # Remove (##) from assignment name
+        name = args[0]  # .split(" (")[0]
+        for assignment in self.assignments:
+            if assignment.name == name:
+                self.selected_assignment = assignment
+        if self.selected_assignment is not None:
+            self.output_assignment_id["text"] = f"{self.selected_assignment.id}, {self.selected_assignment.needs_grading_count} to grade"
+        else:
+            self.output_assignment_id["text"] = ""
 
     def setup_grading(self):
         # Get video files from selected directory
