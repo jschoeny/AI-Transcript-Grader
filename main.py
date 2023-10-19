@@ -1,4 +1,5 @@
 import os
+import threading
 
 import moviepy.editor as mp
 
@@ -42,6 +43,7 @@ class App(tk.Tk):
         self.courses = canvas.get_courses(enrollment_type="ta", enrollment_state="active")
         self.course_list = []
         self.course_var = None
+        self.course_dropdown = None
         self.output_course_id = None
 
         self.assignments = None
@@ -61,8 +63,8 @@ class App(tk.Tk):
             self.course_list.append(course.course_code)
         self.course_var = tk.StringVar(self)
         self.course_var.set(self.course_list[0])
-        course_dropdown = tk.OptionMenu(self, self.course_var, *self.course_list, command=self.choose_course)
-        course_dropdown.grid(row=0, column=1, padx=10, pady=10, sticky=tk.W)
+        self.course_dropdown = tk.OptionMenu(self, self.course_var, *self.course_list, command=self.choose_course)
+        self.course_dropdown.grid(row=0, column=1, padx=10, pady=10, sticky=tk.W)
 
         tk.Label(self, text="Selected course id:").grid(row=1, column=0, padx=10, pady=10, sticky=tk.W)
 
@@ -84,34 +86,54 @@ class App(tk.Tk):
         self.output_assignment_id.grid(row=3, column=1, padx=10, pady=10, sticky=tk.W)
 
     def choose_course(self, *args):
-        # Set selected course to course.id of selected course
-        for course in self.courses:
-            if course.course_code == args[0]:
-                self.selected_course = course
-        self.output_course_id["text"] = f"{self.selected_course.id}"
+        def choose_course_thread(self, name):
+            # Set selected course to course.id of selected course
+            for course in self.courses:
+                if course.course_code == name:
+                    self.selected_course = course
 
-        self.selected_assignment = None
-        self.output_assignment_id["text"] = ""
+            self.selected_assignment = None
+            self.output_assignment_id["text"] = ""
 
-        self.assignment_dropdown["state"] = "normal"
-        self.assignment_list = []
-        self.assignments = self.selected_course.get_assignments(bucket="ungraded")
-        for assignment in self.assignments:
-            self.assignment_list.append(f"{assignment.name}")
-        self.assignment_var.set(self.assignment_list[0])
-        self.assignment_dropdown = tk.OptionMenu(self, self.assignment_var, *self.assignment_list, command=self.choose_assignment)
-        self.assignment_dropdown.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
+            self.assignment_list = []
+            self.assignments = self.selected_course.get_assignments(bucket="ungraded")
+            for assignment in self.assignments:
+                self.assignment_list.append(f"{assignment.name}")
+            self.assignment_var.set(self.assignment_list[0])
+            self.assignment_dropdown = tk.OptionMenu(self, self.assignment_var, *self.assignment_list, command=self.choose_assignment)
+            self.assignment_dropdown.grid(row=2, column=1, padx=10, pady=10, sticky=tk.W)
+
+            self.output_course_id["text"] = f"{self.selected_course.id}"
+            self.course_dropdown["state"] = "normal"
+            self.assignment_dropdown["state"] = "normal"
+
+        thread = threading.Thread(target=choose_course_thread, args=[self, args[0]])
+        self.output_course_id["text"] = "Loading..."
+        self.course_dropdown["state"] = "disabled"
+        self.assignment_dropdown["state"] = "disabled"
+
+        thread.start()
 
     def choose_assignment(self, *args):
-        # Remove (##) from assignment name
-        name = args[0]  # .split(" (")[0]
-        for assignment in self.assignments:
-            if assignment.name == name:
-                self.selected_assignment = assignment
-        if self.selected_assignment is not None:
-            self.output_assignment_id["text"] = f"{self.selected_assignment.id}, {self.selected_assignment.needs_grading_count} to grade"
-        else:
-            self.output_assignment_id["text"] = ""
+        def choose_assignment_thread(self, name):
+            for assignment in self.assignments:
+                if assignment.name == name:
+                    self.selected_assignment = assignment
+
+            if self.selected_assignment is not None:
+                self.output_assignment_id[
+                    "text"] = f"{self.selected_assignment.id}, {self.selected_assignment.needs_grading_count} to grade"
+            else:
+                self.output_assignment_id["text"] = ""
+            self.course_dropdown["state"] = "normal"
+            self.assignment_dropdown["state"] = "normal"
+
+        thread = threading.Thread(target=choose_assignment_thread, args=[self, args[0]])
+        self.output_assignment_id["text"] = "Loading..."
+        self.course_dropdown["state"] = "disabled"
+        self.assignment_dropdown["state"] = "disabled"
+
+        thread.start()
 
     def setup_grading(self):
         # Get video files from selected directory
