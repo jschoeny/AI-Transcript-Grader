@@ -25,9 +25,13 @@ INCLUDED_EXTENSIONS = ['.mov', '.mp4', '.mkv', '.m4v', '.webm']
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        w = 600
-        h = 300
-        self.geometry("%dx%d+%d+%d" % (w, h, self.winfo_screenwidth() / 2 - (w/2), self.winfo_screenheight() / 2 - (h/2)))
+        w = 500
+        h = 280
+        self.geometry("%dx%d+%d+%d" % (w, h, self.winfo_screenwidth() / 2 - (w/2),
+                                       self.winfo_screenheight() / 2 - (h/2)))
+        # self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.configure(padx=20, pady=20)
         self.title("AI Grader")
         self.resizable(False, False)
 
