@@ -52,6 +52,8 @@ class App(tk.Tk):
         self.assignment_dropdown = None
         self.output_assignment_id = None
 
+        self.start_grading_button = None
+
         self.setup()
 
     def setup(self):
@@ -84,6 +86,10 @@ class App(tk.Tk):
 
         self.output_assignment_id = tk.Label(self, text="")
         self.output_assignment_id.grid(row=3, column=1, padx=10, pady=10, sticky=tk.W)
+
+        self.start_grading_button = tk.Button(self, text="Start grading", command=self.start_grading)
+        self.start_grading_button.grid(row=4, column=0, columnspan=2, padx=120, pady=20, sticky=tk.EW)
+        self.start_grading_button["state"] = "disabled"
 
     def choose_course(self, *args):
         def choose_course_thread(self, name):
@@ -123,8 +129,10 @@ class App(tk.Tk):
             if self.selected_assignment is not None:
                 self.output_assignment_id[
                     "text"] = f"{self.selected_assignment.id}, {self.selected_assignment.needs_grading_count} to grade"
+                self.start_grading_button["state"] = "normal"
             else:
                 self.output_assignment_id["text"] = ""
+                self.start_grading_button["state"] = "disabled"
             self.course_dropdown["state"] = "normal"
             self.assignment_dropdown["state"] = "normal"
 
@@ -134,6 +142,9 @@ class App(tk.Tk):
         self.assignment_dropdown["state"] = "disabled"
 
         thread.start()
+
+    def start_grading(self):
+        pass
 
     def setup_grading(self):
         # Get video files from selected directory
