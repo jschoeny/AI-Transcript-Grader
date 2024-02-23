@@ -54,7 +54,7 @@ for fname in file_names:
         else:
             print(f"[{student_name}] Extracting audio...")
             clip = mp.VideoFileClip(file)
-            clip.audio.write_audiofile(audio_fname)
+            clip.audio.write_audiofile(audio_fname, ffmpeg_params=['-ac', '1'], logger=None)
 
         # Generate transcript using Whisper API
         if exists(transcript_fname):
