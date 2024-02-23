@@ -36,6 +36,7 @@ os.makedirs(directory + "/audio", exist_ok=True)
 for fname in file_names:
     # Create strings for filenames
     file = directory + "/" + fname
+    student_name = fname.split("_")[0]
     audio_fname = directory + "/audio/" + splitext(fname)[0] + ".mp3"
     transcript_fname = directory + "/transcripts/" + splitext(fname)[0] + ".txt"
     response_fname = directory + "/grades/" + splitext(fname)[0] + ".txt"
@@ -49,24 +50,25 @@ for fname in file_names:
     try:
         # Extract audio and save as mp3
         if exists(audio_fname):
-            print("Using existing audio file: " + audio_fname)
+            print(f"[{student_name}] Using existing audio file: " + audio_fname)
         else:
+            print(f"[{student_name}] Extracting audio...")
             clip = mp.VideoFileClip(file)
             clip.audio.write_audiofile(audio_fname)
 
         # Generate transcript using Whisper API
         if exists(transcript_fname):
-            print("Reusing old transcript...")
+            print(f"[{student_name}] Reusing old transcript...")
             transcript = open(transcript_fname).read()
         else:
             audio_file = open(audio_fname, "rb")
-            print("Transcribing audio...")
+            print(f"[{student_name}] Transcribing audio...")
             transcript = openai.Audio.transcribe("whisper-1", audio_file)["text"]
             with open(transcript_fname, "w") as f:
                 f.write(transcript)
 
         # Compare transcript to rubric using ChatGPT API
-        print("Checking against rubric...")
+        print(f"[{student_name}] Checking against rubric...")
         completion = openai.ChatCompletion.create(
           model="gpt-3.5-turbo",
           messages=[
@@ -81,10 +83,10 @@ for fname in file_names:
         grade = completion['choices'][0]['message']['content']
         with open(response_fname, "w") as f:
             f.write(grade)
-        print("Response saved.\t", grade.count("Yes"), "Yes.\t", grade.count("No"), "No.\t",
+        print(f"[{student_name}] Response saved.\t", grade.count("Yes"), "Yes.\t", grade.count("No"), "No.\t",
               grade.count("Partial"), "Partial.")
         print()
     except BaseException as e:
-        print("Error encountered processing this student's submission")
+        print(f"Error encountered processing {student_name}'s submission")
         print(e)
 print("Done.")
