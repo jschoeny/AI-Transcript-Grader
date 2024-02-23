@@ -1,4 +1,5 @@
 import os
+import threading
 
 import moviepy.editor as mp
 import openai
@@ -32,8 +33,8 @@ os.makedirs(directory + "/transcripts", exist_ok=True)
 os.makedirs(directory + "/grades", exist_ok=True)
 os.makedirs(directory + "/audio", exist_ok=True)
 
-# Loop through all found video files
-for fname in file_names:
+
+def process_video(fname):
     # Create strings for filenames
     file = directory + "/" + fname
     student_name = fname.split("_")[0]
@@ -43,7 +44,7 @@ for fname in file_names:
 
     # Skip already graded videos
     if exists(response_fname):
-        continue
+        return
 
     print("Processing " + fname + "...")
 
@@ -89,4 +90,18 @@ for fname in file_names:
     except BaseException as e:
         print(f"Error encountered processing {student_name}'s submission")
         print(e)
+
+
+# Start threads for all found videos
+threads = []
+for f in file_names:
+    t = threading.Thread(target=process_video, args=(f,))
+    threads.append(t)
+
+for t in threads:
+    t.start()
+
+for t in threads:
+    t.join()
+
 print("Done.")
