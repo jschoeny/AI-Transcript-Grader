@@ -70,7 +70,7 @@ for fname in file_names:
         # Compare transcript to rubric using ChatGPT API
         print(f"[{student_name}] Checking against rubric...")
         completion = openai.ChatCompletion.create(
-          model="gpt-3.5-turbo",
+          model="gpt-4-turbo-preview",
           messages=[
             {"role": "system", "content": system_message},
             {"role": "user", "content": rubric},
