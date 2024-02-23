@@ -11,9 +11,9 @@ Uses OpenAI's Whisper and ChatGPT APIs to compare student video submissions agai
 
 ## Grading
 - Download student video submissions into a single folder.
-- Paste rubric into `rubric.txt` file.
-- Run `python main.py path/to/video/files`
+- Paste rubric into `rubric.txt` file (or include your rubric txt file as an argument).
+- Run `python main.py path/to/video/files [path/to/rubric]`
 
 ## Common errors
-- If you get an error message about ffmpeg, you may need install ffmpeg with Hombrew using: `brew install ffmpeg`
+- If you get an error message about ffmpeg, you may need install ffmpeg with Homebrew using: `brew install ffmpeg`
 
