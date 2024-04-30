@@ -86,7 +86,6 @@ def process_video(fname):
             f.write(grade)
         print(f"[{student_name}] Response saved.\t", grade.count("Yes"), "Yes.\t", grade.count("No"), "No.\t",
               grade.count("Partial"), "Partial.")
-        print()
     except BaseException as e:
         print(f"Error encountered processing {student_name}'s submission")
         print(e)
