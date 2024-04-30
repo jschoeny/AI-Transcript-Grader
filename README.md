@@ -5,6 +5,8 @@ _**Always double-check the student's submission** if the AI's reasoning sounds o
 # AI-Transcript-Grader
 Uses OpenAI's Whisper and ChatGPT APIs to compare student video submissions against a given rubric.
 
+![Screenshot of console and text document containing graded assessment from AI.](res/ai_grader_screenshots.png)
+
 ## Setup
 - Install required dependencies using `pip install -r requirements.txt`. 
 - Add your OpenAI API Key to your environment variables
